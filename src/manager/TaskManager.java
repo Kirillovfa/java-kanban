@@ -1,9 +1,9 @@
-package ManagerPackage;
+package manager;
 
-import TaskPackage.Epic;
-import TaskPackage.Subtask;
-import TaskPackage.Task;
-import TaskPackage.Status;
+import task.Epic;
+import task.Subtask;
+import task.Task;
+import task.Status;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -80,12 +80,11 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int id) {
-        Epic epic = epics.get(id);
+        Epic epic = epics.remove(id);
         if (epic != null) {
             for (int subtaskId : epic.getsubtasksIds()) {
                 subtasks.remove(subtaskId);
             }
-            epics.remove(id);
         }
     }
 
@@ -107,6 +106,7 @@ public class TaskManager {
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.getsubtasksIds().clear();
+            updateEpicStatus(epic.getId());
         }
     }
 
@@ -141,15 +141,5 @@ public class TaskManager {
             }
         }
         return subtaskList;
-    }
-
-    @Override
-    public String toString() {
-        return "ManagerPackage.TaskManager{" +
-                "nextId=" + nextId +
-                ", tasks=" + tasks +
-                ", epics=" + epics +
-                ", subtasks=" + subtasks +
-                '}';
     }
 }
