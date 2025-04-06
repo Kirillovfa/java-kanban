@@ -6,7 +6,7 @@ public class Subtask extends Task {
     public Subtask(int id, String title, String description, Status status, int epicId) {
         super(id, title, description, status);
         if (id == epicId) {
-            System.out.println("Сабтаска не может ссылаться на саму себя как на эпик.");
+            System.out.println("Сабтаска не может ссылаться на саму себя как на эпик"); // иначе не проходит тест
             this.epicId = -1;
         } else {
             this.epicId = epicId;
