@@ -1,24 +1,33 @@
 package task;
 
 public class Subtask extends Task {
-    private final int epicId;
+    private int epicId;
 
-    public Subtask(int id, String name, String description, Status status, int epicId) {
-        super(id, name, description, status);
-        this.epicId = epicId;
+    public Subtask(int id, String title, String description, Status status, int epicId) {
+        super(id, title, description, status);
+        if (id == epicId) {
+            System.out.println("Сабтаска не может ссылаться на саму себя как на эпик.");
+            this.epicId = -1; // или 0 — зависит от твоей логики
+        } else {
+            this.epicId = epicId;
+        }
     }
 
     public int getEpicId() {
         return epicId;
     }
 
+    public void setEpicId(int epicId) {
+        if (this.getId() == epicId) {
+            System.out.println("Сабтаска не может ссылаться на саму себя.");
+            this.epicId = -1;
+        } else {
+            this.epicId = epicId;
+        }
+    }
+
     @Override
     public String toString() {
-        return "TaskPackage.Subtask{" +
-                "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", status=" + getStatus() +
-                ", epicId=" + getEpicId() +
-                '}';
+        return super.toString() + ", epicId=" + epicId;
     }
 }
