@@ -7,7 +7,7 @@ public class Subtask extends Task {
         super(id, title, description, status);
         if (id == epicId) {
             System.out.println("Сабтаска не может ссылаться на саму себя как на эпик.");
-            this.epicId = -1; // или 0 — зависит от твоей логики
+            this.epicId = -1;
         } else {
             this.epicId = epicId;
         }
