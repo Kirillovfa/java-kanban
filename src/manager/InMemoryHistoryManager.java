@@ -26,7 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-
     private void linkLast(Task task) {
         Node newNode = new Node(task, tail, null);
         if (tail == null) {
