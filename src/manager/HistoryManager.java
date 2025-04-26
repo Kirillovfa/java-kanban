@@ -7,7 +7,7 @@ public interface HistoryManager {
 
     void add(Task task);
 
-    void remove(int id);
+    void remove(int id);//добавил отступ
 
     List<Task> getHistory();
 }
