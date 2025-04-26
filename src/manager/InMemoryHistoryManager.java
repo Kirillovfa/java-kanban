@@ -1,13 +1,13 @@
 package manager;
 
 import task.Task;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
 public class InMemoryHistoryManager implements HistoryManager {
-
 
 
     private Node head;
