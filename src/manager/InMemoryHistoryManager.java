@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private static final int MAX_HISTORY_SIZE = 10;
-    private final LinkedList<Task> history = new LinkedList<>();
-    private final Map<Integer, Node> historyMap = new HashMap<>();
+
+
+
     private Node head;
     private Node tail;
     private final Map<Integer, Node> nodes = new HashMap<>();
