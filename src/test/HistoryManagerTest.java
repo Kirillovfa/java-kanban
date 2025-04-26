@@ -39,14 +39,23 @@ public class HistoryManagerTest {
     }
 
     @Test
-    void historyShouldStoreUpToTenTasks() {
-        for (int i = 1; i <= 20; i++) {
-            Task task = new Task(i, "Task " + i, "Описание " + i, Status.NEW);
+    void taskNotAddTwice() {
+        Task task = new Task(1, "Имя таски", "Описание таски", Status.NEW);
+        historyManager.add(task);
+        historyManager.add(task);
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(1, history.size(), "1 задача может быть не больше 1 раза в истории");
+    }
+
+    @Test
+    void historyNotLimited() {
+        for (int i = 1; i <= 30; i++) {
+            Task task = new Task(i, "Имя таски " + i, "Описание таски " + i, Status.NEW);
             historyManager.add(task);
         }
 
         List<Task> history = historyManager.getHistory();
-        assertEquals(10, history.size(), "История должна состоять максимум из 10 тасок");
-        assertEquals(11, history.get(0).getId(), "Таска не стала первой в списке");
+        assertEquals(30, history.size(), "Не должно быть ограничений на размер истории");
     }
 }
