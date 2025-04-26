@@ -11,12 +11,10 @@ import task.*;
 public class TaskManagerTest {
 
     private TaskManager taskManager;
-    private HistoryManager historyManager;
 
     @BeforeEach
     void setUp() {
         taskManager = Managers.getDefault();
-        historyManager = Managers.getDefaultHistory();
     }
 
     @Test
