@@ -8,17 +8,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import manager.*;
 import task.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HistoryManagerTest {
 
-    private TaskManager taskManager;
     private HistoryManager historyManager;
 
     @BeforeEach
     void setUp() {
-        taskManager = Managers.getDefault();
         historyManager = Managers.getDefaultHistory();
     }
 
