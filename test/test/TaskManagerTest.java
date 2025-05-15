@@ -47,8 +47,10 @@ public class TaskManagerTest {
 
     @Test
     void subtaskCannotReferenceItselfAsEpic() {
-        Subtask subtask = new Subtask(1, "Subtask", "Проверка", Status.NEW, 1);
-        assertNotEquals(subtask.getId(), subtask.getEpicId(), "Сабтаска может ссылаться на саму себя как на epic");
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Subtask(1, "Subtask", "Проверка", Status.NEW, 1);
+        });
+        assertEquals("Сабтаска не может ссылаться на саму себя как на epic", exception.getMessage());
     }
 
     @Test
