@@ -3,24 +3,25 @@ package manager;
 import task.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class InMemoryTaskManager {
+public class InMemoryTaskManager implements TaskManager {
     protected int nextId = 1;
     protected final Map<Integer, Task> tasks = new HashMap<>();
     protected final Map<Integer, Epic> epics = new HashMap<>();
     protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 
-    public Map<Integer, Task> getTasks() {
-        return tasks;
+    public HashMap<Integer, Task> getTasks() {
+        return (HashMap<Integer, Task>) tasks;
     }
 
-    public Map<Integer, Epic> getEpics() {
-        return epics;
+    public HashMap<Integer, Epic> getEpics() {
+        return (HashMap<Integer, Epic>) epics;
     }
 
-    public Map<Integer, Subtask> getSubtasks() {
-        return subtasks;
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return (HashMap<Integer, Subtask>) subtasks;
     }
 
     public void createTask(String name, String description) {
@@ -86,5 +87,30 @@ public class InMemoryTaskManager {
     public void deleteAllEpics() {
         epics.clear();
         subtasks.clear();
+    }
+
+    @Override
+    public Task getTaskById(int id) {
+        return null;
+    }
+
+    @Override
+    public Subtask getSubtaskById(int id) {
+        return null;
+    }
+
+    @Override
+    public Epic getEpicById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Subtask> getSubtasksByEpicId(int epicId) {
+        return List.of();
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return List.of();
     }
 }
