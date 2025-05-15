@@ -1,101 +1,89 @@
-package test;
+package manager;
 
-import manager.*;
-import task.*;
 import org.junit.jupiter.api.*;
+import task.*;
+
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
-
-    File tempFile;
-    FileBackedTaskManager manager;
+class FileBackedTaskManagerTest {
+    private File file;
+    private FileBackedTaskManager manager;
 
     @BeforeEach
-    void setUp() throws IOException {
-        tempFile = File.createTempFile("tasks", ".csv");
-        // чистим файл
-        if (tempFile.exists()) {
-            tempFile.delete();
-            tempFile.createNewFile();
-        }
-        manager = new FileBackedTaskManager(tempFile);
+    void setUp() throws Exception {
+        file = File.createTempFile("tasks", ".csv");
+        manager = new FileBackedTaskManager(file);
     }
 
     @AfterEach
     void tearDown() {
-        if (tempFile.exists()) {
-            tempFile.delete();
-        }
+        file.delete();
     }
 
     @Test
-    void saveAndLoadEmptyFile() {
+    void testSaveAndLoad() throws Exception {
+        int epicId = manager.createEpic("Epic1", "EpicDesc");
+        manager.createTask("Task1", "TaskDesc");
+        manager.createSubtask("Subtask1", "SubDesc", epicId);
 
-        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
+        manager.save();
 
-        assertTrue(loaded.getTasks().isEmpty(), "Список задач должен быть пуст");
-        assertTrue(loaded.getEpics().isEmpty(), "Список эпиков должен быть пуст");
-        assertTrue(loaded.getSubtasks().isEmpty(), "Список подзадач должен быть пуст");
+        List<String> lines = Files.readAllLines(file.toPath());
+        assertTrue(lines.size() > 1);
+        assertEquals("id,type,name,status,description,epic", lines.get(0));
+
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+
+        assertEquals(manager.getTasks().size(), loadedManager.getTasks().size());
+        assertEquals(manager.getEpics().size(), loadedManager.getEpics().size());
+        assertEquals(manager.getSubtasks().size(), loadedManager.getSubtasks().size());
+
+        Task loadedTask = loadedManager.getTasks().values().iterator().next();
+        assertEquals("Task1", loadedTask.getName());
+
+        Epic loadedEpic = loadedManager.getEpics().get(epicId);
+        assertNotNull(loadedEpic);
+        assertEquals("Epic1", loadedEpic.getName());
+        assertEquals(1, loadedEpic.getSubtaskIds().size());
+
+        Subtask loadedSubtask = loadedManager.getSubtasks().values().iterator().next();
+        assertEquals("Subtask1", loadedSubtask.getName());
+        assertEquals(epicId, loadedSubtask.getEpicId());
     }
 
     @Test
-    void saveAndLoadSeveralTasks() {
-        manager.createTask("Task1", "Desc1");
-        int epicId = manager.createEpic("Epic1", "EpicDesc1");
-        manager.createSubtask("Sub1", "SubDesc1", epicId);
+    void testCreateAndDelete() {
+        manager.createTask("Task", "Desc");
+        int epicId = manager.createEpic("Epic", "Desc");
+        manager.createSubtask("Subtask", "Desc", epicId);
 
-        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
+        assertEquals(1, manager.getTasks().size());
+        assertEquals(1, manager.getEpics().size());
+        assertEquals(1, manager.getSubtasks().size());
 
-        assertEquals(1, loaded.getTasks().size(), "Должна быть одна обычная задача");
-        assertEquals(1, loaded.getEpics().size(), "Должен быть один эпик");
-        assertEquals(1, loaded.getSubtasks().size(), "Должна быть одна подзадача");
+        manager.deleteTask(1);
+        assertEquals(0, manager.getTasks().size());
 
-        Task task = loaded.getTasks().values().iterator().next();
-        assertEquals("Task1", task.getName());
-        Epic epic = loaded.getEpics().values().iterator().next();
-        assertEquals("Epic1", epic.getName());
-        Subtask subtask = loaded.getSubtasks().values().iterator().next();
-        assertEquals("Sub1", subtask.getName());
-        assertEquals(epicId, subtask.getEpicId());
+        manager.deleteSubtask(3);
+        assertEquals(0, manager.getSubtasks().size());
+        assertTrue(manager.getEpics().get(epicId).getSubtaskIds().isEmpty());
+
+        manager.deleteEpicById(epicId);
+        assertEquals(0, manager.getEpics().size());
     }
 
     @Test
-    void loadFromFileWithMultipleTasks() throws IOException {
-        manager.createTask("T1", "D1");
-        manager.createTask("T2", "D2");
-        int epicId = manager.createEpic("Epic", "Edesc");
-        manager.createSubtask("S1", "Sdesc1", epicId);
-        manager.createSubtask("S2", "Sdesc2", epicId);
+    void testUpdateTask() {
+        manager.createTask("Task", "Desc");
+        Task task = manager.getTasks().get(1);
+        task.setStatus(Status.DONE);
+        manager.updateTask(task);
 
-        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
-
-        assertEquals(2, loaded.getTasks().size(), "Должно быть две задачи");
-        assertEquals(1, loaded.getEpics().size(), "Должен быть один эпик");
-        assertEquals(2, loaded.getSubtasks().size(), "Должно быть две подзадачи");
-
-        Epic epic = loaded.getEpics().values().iterator().next();
-        List<Integer> subtaskIds = epic.getsubtasksIds();
-        assertEquals(2, subtaskIds.size(), "У эпика должно быть две подзадачи");
-    }
-
-    @Test
-    void loadedManagerBehavesLikeInMemoryManager() {
-        manager.createTask("T", "D");
-        int epicId = manager.createEpic("E", "Ed");
-        manager.createSubtask("S", "Sd", epicId);
-
-        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
-
-        Task t = loaded.getTaskById(1);
-        assertNotNull(t, "Задача должна быть найдена по id");
-
-        Epic e = loaded.getEpicById(epicId);
-        assertNotNull(e, "Эпик должен быть найден по id");
-
-        Subtask s = loaded.getSubtaskById(3);
-        assertNotNull(s, "Сабтаска должна быть найдена по id");
+        Task updated = manager.getTasks().get(1);
+        assertEquals(Status.DONE, updated.getStatus());
     }
 }

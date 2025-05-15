@@ -14,7 +14,7 @@ public class TaskManagerTest {
 
     @BeforeEach
     void setUp() {
-        taskManager = Managers.getDefault();
+        taskManager = (TaskManager) Managers.getDefault();
     }
 
     @Test
@@ -41,8 +41,8 @@ public class TaskManagerTest {
     @Test
     void epicCannotContainItself() {
         Epic epic = new Epic(1, "Epic", "Self-reference check");
-        epic.addsubtask(1); // добавляем ID самого себя
-        assertFalse(epic.getsubtasksIds().contains(1), "Epic может быть своей подзадачей");
+        epic.addSubtask(1); // добавляем ID самого себя
+        assertFalse(epic.getSubtaskIds().contains(1), "Epic может быть своей подзадачей");
     }
 
     @Test
@@ -53,7 +53,7 @@ public class TaskManagerTest {
 
     @Test
     void managersShouldReturnInitializedManagers() {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = (TaskManager) Managers.getDefault();
         HistoryManager historyManager = Managers.getDefaultHistory();
         assertNotNull(taskManager);
         assertNotNull(historyManager);
