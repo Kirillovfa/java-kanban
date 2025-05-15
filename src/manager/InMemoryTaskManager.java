@@ -2,6 +2,7 @@ package manager;
 
 import task.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +36,17 @@ public class InMemoryTaskManager implements TaskManager {
         return epic.getId();
     }
 
+    @Override
     public void createSubtask(String name, String description, int epicId) {
         if (!epics.containsKey(epicId)) return;
+        int subtaskId = nextId;
+        if (epicId == subtaskId) {
+            return;
+        }
         Subtask subtask = new Subtask(nextId++, name, description, Status.NEW, epicId);
+        if (subtask.getId() == epicId) {
+            throw new IllegalArgumentException("Сабтаска не может ссылаться на саму себя как на эпик");
+        }
         subtasks.put(subtask.getId(), subtask);
         epics.get(epicId).addSubtask(subtask.getId());
     }
@@ -91,22 +100,33 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        return null;
+        return tasks.get(id);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        return null;
+        return subtasks.get(id);
     }
 
     @Override
     public Epic getEpicById(int id) {
-        return null;
+        return epics.get(id);
     }
 
     @Override
     public List<Subtask> getSubtasksByEpicId(int epicId) {
-        return List.of();
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            return List.of();
+        }
+        List<Subtask> result = new ArrayList<>();
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask != null) {
+                result.add(subtask);
+            }
+        }
+        return result;
     }
 
     @Override

@@ -45,6 +45,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void createSubtask(String name, String description, int epicId) {
+        Subtask subtask = new Subtask(name, description, epicId);
+        if (subtask.getId() == epicId) {
+            throw new IllegalArgumentException("Сабтаска не может ссылаться на саму себя как на эпик");
+        }
         super.createSubtask(name, description, epicId);
         save();
     }
