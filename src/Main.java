@@ -6,7 +6,7 @@ import task.Subtask;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = (TaskManager) Managers.getDefault();
 
         taskManager.createTask("Сделать ДЗ", "Сделать ТЗ по 4 спринту в практикуме");
         int epic1Id = taskManager.createEpic("Собрать книги в отпуск", "Перед отпуском нужно купить книги");
