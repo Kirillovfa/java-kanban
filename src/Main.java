@@ -31,20 +31,22 @@ public class Main {
 
     private static void printAllTasks(TaskManager manager) {
         System.out.println("Задачи:");
-        for (Task task : manager.getTasks().values()) {
+        for (Task task : manager.getTasks()) {
             System.out.println(task);
         }
 
         System.out.println("Эпики:");
-        for (Epic epic : manager.getEpics().values()) {
+        for (Epic epic : manager.getEpics()) {
             System.out.println(epic);
-            for (Subtask subtask : manager.getSubtasksByEpicId(epic.getId())) {
-                System.out.println("  --> " + subtask);
+            for (Subtask sub : manager.getSubtasks()) {
+                if (sub.getEpicId() == epic.getId()) {
+                    System.out.println(sub);
+                }
             }
         }
 
         System.out.println("Подзадачи:");
-        for (Subtask subtask : manager.getSubtasks().values()) {
+        for (Subtask subtask : manager.getSubtasks()) {
             System.out.println(subtask);
         }
 

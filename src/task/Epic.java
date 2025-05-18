@@ -1,8 +1,6 @@
 package task;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Epic extends Task {
     private final List<Integer> subtaskIds = new ArrayList<>();
@@ -11,35 +9,32 @@ public class Epic extends Task {
         super(id, name, description, Status.NEW);
     }
 
-    public Epic(String name, String description) {
-        super(name, description);
+    public void addSubtask(int subtaskId) {
+        if (subtaskId == this.getId()) {
+            return;
+        }
+        subtaskIds.add(subtaskId);
+    }
+
+    public void removeSubtask(int subtaskId) {
+        subtaskIds.remove((Integer) subtaskId);
     }
 
     public List<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return new ArrayList<>(subtaskIds);
     }
 
-    public void addSubtask(int id) {
-        if (id == this.id) {
-            System.out.println("Epic не может содержать себя в списке подзадач");
-            return;
-        }
-        subtaskIds.add(id);
-    }
-
-    public void removeSubtask(int id) {
-        subtaskIds.remove((Integer) id);
+    public void clearSubtaskIds() {
+        subtaskIds.clear();
     }
 
     @Override
-    public String toString() {
-        return id + "," + TaskType.EPIC + "," + name + "," + status + "," + description + ",";
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Epic)) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
         return Objects.equals(subtaskIds, epic.subtaskIds);
