@@ -1,14 +1,23 @@
 package manager;
 
-import task.Task;
-import task.Epic;
-import task.Subtask;
+import task.*;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.HashMap;
-
 
 public interface TaskManager {
+    Collection<Task> getTasks();
+
+    Collection<Epic> getEpics();
+
+    Collection<Subtask> getSubtasks();
+
+    Task getTaskById(int id);
+
+    Epic getEpicById(int id);
+
+    Subtask getSubtaskById(int id);
+
     void createTask(String name, String description);
 
     int createEpic(String name, String description);
@@ -17,33 +26,25 @@ public interface TaskManager {
 
     void updateTask(Task task);
 
+    void updateEpic(Epic epic);
+
     void updateSubtask(Subtask subtask);
 
     void deleteTask(int id);
 
+    void deleteSubtask(int id);
+
+    void deleteTaskById(int id);
+
     void deleteEpicById(int id);
 
-    void deleteSubtask(int id);
+    void deleteSubtaskById(int id);
 
     void deleteAllTasks();
 
-    void deleteAllSubtasks();
-
     void deleteAllEpics();
 
-    Task getTaskById(int id);
-
-    Subtask getSubtaskById(int id);
-
-    Epic getEpicById(int id);
-
-    List<Subtask> getSubtasksByEpicId(int epicId);
+    void deleteAllSubtasks();
 
     List<Task> getHistory();
-
-    HashMap<Integer, Task> getTasks();
-
-    HashMap<Integer, Epic> getEpics();
-
-    HashMap<Integer, Subtask> getSubtasks();
 }

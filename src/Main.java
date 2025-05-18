@@ -6,7 +6,7 @@ import task.Subtask;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = (TaskManager) Managers.getDefault();
 
         taskManager.createTask("Сделать ДЗ", "Сделать ТЗ по 4 спринту в практикуме");
         int epic1Id = taskManager.createEpic("Собрать книги в отпуск", "Перед отпуском нужно купить книги");
@@ -31,20 +31,22 @@ public class Main {
 
     private static void printAllTasks(TaskManager manager) {
         System.out.println("Задачи:");
-        for (Task task : manager.getTasks().values()) {
+        for (Task task : manager.getTasks()) {
             System.out.println(task);
         }
 
         System.out.println("Эпики:");
-        for (Epic epic : manager.getEpics().values()) {
+        for (Epic epic : manager.getEpics()) {
             System.out.println(epic);
-            for (Subtask subtask : manager.getSubtasksByEpicId(epic.getId())) {
-                System.out.println("  --> " + subtask);
+            for (Subtask sub : manager.getSubtasks()) {
+                if (sub.getEpicId() == epic.getId()) {
+                    System.out.println(sub);
+                }
             }
         }
 
         System.out.println("Подзадачи:");
-        for (Subtask subtask : manager.getSubtasks().values()) {
+        for (Subtask subtask : manager.getSubtasks()) {
             System.out.println(subtask);
         }
 
