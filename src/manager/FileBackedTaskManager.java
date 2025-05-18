@@ -16,7 +16,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String header = reader.readLine(); // пропускаем заголовок
+            String header = reader.readLine();
             String line;
             while ((line = reader.readLine()) != null && !line.isBlank()) {
                 Task task = fromString(line);
