@@ -13,17 +13,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Collection<Task> getTasks() {
-        return tasks.values();
+        return new ArrayList<>(tasks.values());
     }
 
     @Override
     public Collection<Epic> getEpics() {
-        return epics.values();
+        return new ArrayList<>(epics.values());
     }
 
     @Override
     public Collection<Subtask> getSubtasks() {
-        return subtasks.values();
+        return new ArrayList<>(subtasks.values());
     }
 
     @Override
