@@ -19,19 +19,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     protected void save() {
         try (Writer writer = new FileWriter(file)) {
             writer.write("id,type,name,status,description,epic,duration,startTime\n");
-            // TASKS
             for (Task task : tasks.values()) {
                 writer.write(toString(task) + "\n");
             }
-            // EPICS
             for (Epic epic : epics.values()) {
                 writer.write(toString(epic) + "\n");
             }
-            // SUBTASKS
             for (Subtask subtask : subtasks.values()) {
                 writer.write(toString(subtask) + "\n");
             }
-            // HISTORY
             writer.write("\n");
             writer.write(historyToString(historyManager));
         } catch (IOException e) {
@@ -46,7 +42,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         prioritizedTasks.clear();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             boolean isHistory = false;
-            String line = reader.readLine(); // skip header
+            String line = reader.readLine();
             List<String> historyIds = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
@@ -73,18 +69,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     historyIds = Arrays.asList(line.split(","));
                 }
             }
-            // Восстановление связей субтасков и эпиков
+            // Восстановление связей сабтасков и эпиков
             for (Subtask sub : subtasks.values()) {
                 Epic epic = epics.get(sub.getEpicId());
                 if (epic != null) {
                     epic.addSubtask(sub.getId());
                 }
             }
-            // Обновить все эпики по их подзадачам
             for (Epic epic : epics.values()) {
                 updateEpicStatusAndTime(epic);
             }
-            // Восстановление истории
             if (!historyIds.isEmpty()) {
                 for (String idStr : historyIds) {
                     if (idStr.isBlank()) continue;
@@ -99,7 +93,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         } catch (FileNotFoundException e) {
-            // Файл может быть пустым при первом запуске
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения из файла", e);
         }
@@ -129,7 +122,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "",
                     task.getStartTime() != null ? task.getStartTime().toString() : ""
             );
-        } else { // TASK
+        } else {
             return String.join(",",
                     String.valueOf(task.getId()),
                     task.getTaskType().toString(),
@@ -185,7 +178,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 .collect(Collectors.joining(","));
     }
 
-    // --- Переопределяем методы, чтобы сохранять после операций ---
     @Override
     public int createTask(String name, String description, Duration duration, LocalDateTime startTime) {
         int id = super.createTask(name, description, duration, startTime);

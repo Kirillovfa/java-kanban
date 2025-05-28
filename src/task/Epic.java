@@ -30,7 +30,6 @@ public class Epic extends Task {
         return TaskType.EPIC;
     }
 
-    // duration и startTime вычисляются на основании подзадач, в менеджере нужно обновлять!
     public void updateTimesAndStatus(List<Subtask> subtasks) {
         if (subtasks.isEmpty()) {
             this.duration = Duration.ZERO;

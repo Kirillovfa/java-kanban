@@ -179,7 +179,6 @@ public abstract class InMemoryTaskManager implements TaskManager {
             epic.setStartTime(null);
             return;
         }
-        // Статус
         long doneCount = epicSubtasks.stream().filter(st -> st.getStatus() == Status.DONE).count();
         long newCount = epicSubtasks.stream().filter(st -> st.getStatus() == Status.NEW).count();
 
@@ -190,17 +189,14 @@ public abstract class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-        // Время и продолжительность
         epic.updateTimesAndStatus(epicSubtasks);
     }
 
-    // --- Приоритизация ---
     @Override
     public List<Task> getPrioritizedTasks() {
         return new ArrayList<>(prioritizedTasks);
     }
 
-    // --- Проверка пересечений ---
     public boolean hasIntersection(Task task) {
         if (task.getStartTime() == null || task.getDuration() == null) return false;
         LocalDateTime taskStart = task.getStartTime();
