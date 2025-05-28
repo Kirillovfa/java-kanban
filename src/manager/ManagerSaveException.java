@@ -1,11 +1,11 @@
 package manager;
 
 public class ManagerSaveException extends RuntimeException {
-    public ManagerSaveException(final String message) {
+    public ManagerSaveException(String message) {
         super(message);
     }
 
-    public ManagerSaveException(final String message, final Throwable cause) {
+    public ManagerSaveException(String message, Throwable cause) {
         super(message, cause);
     }
 }

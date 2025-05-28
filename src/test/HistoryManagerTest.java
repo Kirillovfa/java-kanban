@@ -1,70 +1,55 @@
+package test;
+
 import manager.HistoryManager;
 import manager.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import task.Status;
-import task.Task;
+import task.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HistoryManagerTest {
-    private HistoryManager historyManager;
+class HistoryManagerTest {
+    private HistoryManager history;
+    private Task task1;
+    private Task task2;
+    private Task task3;
 
     @BeforeEach
-    void setUp() {
-        historyManager = new InMemoryHistoryManager();
+    void setup() {
+        history = new InMemoryHistoryManager();
+        task1 = new Task(1, "Task1", "Desc1", Status.NEW, Duration.ofMinutes(5), LocalDateTime.now());
+        task2 = new Task(2, "Task2", "Desc2", Status.DONE, Duration.ofMinutes(5), LocalDateTime.now());
+        task3 = new Task(3, "Task3", "Desc3", Status.IN_PROGRESS, Duration.ofMinutes(5), LocalDateTime.now());
     }
 
     @Test
-    void addAndGetHistory() {
-        Task task1 = new Task(1, "Таска 1", "Описание таски 1", Status.NEW, Duration.ofMinutes(10), LocalDateTime.now());
-        Task task2 = new Task(2, "Таска 2", "Описание таски 2", Status.NEW, Duration.ofMinutes(15), LocalDateTime.now());
-
-        historyManager.add(task1);
-        historyManager.add(task2);
-
-        List<Task> history = historyManager.getHistory();
-        assertEquals(2, history.size());
-        assertEquals(task1, history.get(0));
-        assertEquals(task2, history.get(1));
+    void emptyHistory() {
+        assertTrue(history.getHistory().isEmpty());
     }
 
     @Test
-    void addSameTaskMovesToEnd() {
-        Task task = new Task(1, "Таска 1", "Описание таски 1", Status.NEW, Duration.ofMinutes(10), LocalDateTime.now());
-
-        historyManager.add(task);
-        historyManager.add(task);
-
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size());
-        assertEquals(task, history.get(0));
+    void addAndGetHistoryNoDuplicates() {
+        history.add(task1);
+        history.add(task1);
+        assertEquals(1, history.getHistory().size());
     }
 
     @Test
-    void removeTaskFromHistory() {
-        Task task1 = new Task(1, "Таска 1", "Описание таски 1", Status.NEW, Duration.ofMinutes(10), LocalDateTime.now());
-        Task task2 = new Task(2, "Таска 2", "Описание таски 2", Status.NEW, Duration.ofMinutes(10), LocalDateTime.now());
+    void removeFromHistoryBeginningMiddleEnd() {
+        history.add(task1);
+        history.add(task2);
+        history.add(task3);
 
-        historyManager.add(task1);
-        historyManager.add(task2);
+        history.remove(task1.getId());
+        assertFalse(history.getHistory().contains(task1));
 
-        historyManager.remove(1);
+        history.remove(task3.getId());
+        assertFalse(history.getHistory().contains(task3));
 
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size());
-        assertEquals(task2, history.get(0));
-    }
-
-    @Test
-    void clearHistory() {
-        Task task1 = new Task(1, "Таска 1", "Описание таски 1", Status.NEW, Duration.ofMinutes(10), LocalDateTime.now());
-        historyManager.add(task1);
-        historyManager.clear();
-        assertTrue(historyManager.getHistory().isEmpty());
+        history.remove(task2.getId());
+        assertTrue(history.getHistory().isEmpty());
     }
 }

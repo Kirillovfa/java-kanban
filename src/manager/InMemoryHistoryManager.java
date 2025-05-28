@@ -10,8 +10,10 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node prev;
         Node next;
 
-        Node(Task task) {
+        Node(Task task, Node prev, Node next) {
             this.task = task;
+            this.prev = prev;
+            this.next = next;
         }
     }
 
@@ -21,8 +23,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        if (task == null) return;
-        remove(task.getId()); // удалить старую запись если есть
+        remove(task.getId());
         linkLast(task);
     }
 
@@ -30,7 +31,16 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void remove(int id) {
         Node node = nodeMap.remove(id);
         if (node == null) return;
-        removeNode(node);
+        if (node.prev != null) {
+            node.prev.next = node.next;
+        } else {
+            head = node.next;
+        }
+        if (node.next != null) {
+            node.next.prev = node.prev;
+        } else {
+            tail = node.prev;
+        }
     }
 
     @Override
@@ -44,36 +54,14 @@ public class InMemoryHistoryManager implements HistoryManager {
         return history;
     }
 
-    @Override
-    public void clear() {
-        head = null;
-        tail = null;
-        nodeMap.clear();
-    }
-
     private void linkLast(Task task) {
-        Node node = new Node(task);
+        Node newNode = new Node(task, tail, null);
         if (tail != null) {
-            tail.next = node;
-            node.prev = tail;
-            tail = node;
+            tail.next = newNode;
         } else {
-            head = node;
-            tail = node;
+            head = newNode;
         }
-        nodeMap.put(task.getId(), node);
-    }
-
-    private void removeNode(Node node) {
-        if (node.prev != null) {
-            node.prev.next = node.next;
-        } else {
-            head = node.next;
-        }
-        if (node.next != null) {
-            node.next.prev = node.prev;
-        } else {
-            tail = node.prev;
-        }
+        tail = newNode;
+        nodeMap.put(task.getId(), newNode);
     }
 }

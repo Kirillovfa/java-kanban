@@ -2,23 +2,17 @@ package task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Epic extends Task {
     private final List<Integer> subtaskIds = new ArrayList<>();
 
-    private Duration duration = Duration.ZERO;
-    private LocalDateTime startTime = null;
-    private LocalDateTime endTime = null;
-
-    public Epic(int id, String name, String description, Status status) {
-        super(id, name, description, status, Duration.ZERO, null);
+    public Epic(int id, String name, String description) {
+        super(id, name, description, Status.NEW, Duration.ZERO, null);
     }
 
     public List<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return Collections.unmodifiableList(subtaskIds);
     }
 
     public void addSubtask(int subtaskId) {
@@ -31,74 +25,47 @@ public class Epic extends Task {
         subtaskIds.remove(Integer.valueOf(subtaskId));
     }
 
-    public void updateEpicFields(List<Subtask> subtasks) {
-        this.duration = Duration.ZERO;
-        this.startTime = null;
-        this.endTime = null;
+    @Override
+    public TaskType getTaskType() {
+        return TaskType.EPIC;
+    }
 
-        for (Subtask subtask : subtasks) {
-            if (subtask.getEpicId() == this.id) {
-                if (subtask.getDuration() != null) {
-                    this.duration = this.duration.plus(subtask.getDuration());
-                }
-                if (subtask.getStartTime() != null) {
-                    if (this.startTime == null || subtask.getStartTime().isBefore(this.startTime)) {
-                        this.startTime = subtask.getStartTime();
-                    }
-                    LocalDateTime subtaskEnd = subtask.getEndTime();
-                    if (subtaskEnd != null) {
-                        if (this.endTime == null || subtaskEnd.isAfter(this.endTime)) {
-                            this.endTime = subtaskEnd;
-                        }
-                    }
-                }
-            }
+    // duration и startTime вычисляются на основании подзадач, в менеджере нужно обновлять!
+    public void updateTimesAndStatus(List<Subtask> subtasks) {
+        if (subtasks.isEmpty()) {
+            this.duration = Duration.ZERO;
+            this.startTime = null;
+            return;
         }
+        this.duration = subtasks.stream()
+                .filter(st -> st.getDuration() != null)
+                .map(Subtask::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
+
+        this.startTime = subtasks.stream()
+                .map(Subtask::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
     }
 
-    @Override
-    public Duration getDuration() {
-        return duration;
-    }
-
-    @Override
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    @Override
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Epic)) return false;
-        if (!super.equals(o)) return false;
-        Epic epic = (Epic) o;
-        return Objects.equals(subtaskIds, epic.subtaskIds) &&
-                Objects.equals(duration, epic.duration) &&
-                Objects.equals(startTime, epic.startTime) &&
-                Objects.equals(endTime, epic.endTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskIds, duration, startTime, endTime);
+    public LocalDateTime getEndTime(List<Subtask> subtasks) {
+        return subtasks.stream()
+                .map(Subtask::getEndTime)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
     }
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", duration=" + duration +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", subtaskIds=" + subtaskIds +
-                '}';
+        return id + "," + getTaskType() + "," + name + "," + status + "," + description +
+                "," + (duration != null ? duration.toMinutes() : "") +
+                "," + (startTime != null ? startTime : "");
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 }

@@ -21,10 +21,6 @@ public class Task {
         this.startTime = startTime;
     }
 
-    public Task(int id, String name, String description, Status status) {
-        this(id, name, description, status, Duration.ZERO, null);
-    }
-
     public int getId() {
         return id;
     }
@@ -41,37 +37,39 @@ public class Task {
         return status;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
     public Duration getDuration() {
         return duration;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
     }
 
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) return null;
+        return startTime.plus(duration);
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        if (startTime == null || duration == null) {
-            return null;
-        }
-        return startTime.plus(duration);
+    public TaskType getTaskType() {
+        return TaskType.TASK;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Task)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return id == task.id &&
                 Objects.equals(name, task.name) &&
@@ -88,13 +86,12 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", duration=" + duration +
-                ", startTime=" + startTime +
-                '}';
+        return id + "," + getTaskType() + "," + name + "," + status + "," + description +
+                "," + (duration != null ? duration.toMinutes() : "") +
+                "," + (startTime != null ? startTime : "");
+    }
+
+    public TaskType getType() {
+        return TaskType.TASK;
     }
 }
