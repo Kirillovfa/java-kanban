@@ -1,67 +1,106 @@
 package test;
 
 import manager.FileBackedTaskManager;
-import manager.TaskManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import task.*;
-import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest {
-    private File tempFile;
-    private TaskManager manager;
+    private File file;
+    private FileBackedTaskManager manager;
 
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = File.createTempFile("tasks", ".csv");
-        manager = new FileBackedTaskManager(tempFile);
+        file = File.createTempFile("tasks", ".csv");
+        file.deleteOnExit();
+        manager = new FileBackedTaskManager(file);
     }
 
     @AfterEach
     void tearDown() {
-        tempFile.delete();
+        file.delete();
     }
 
     @Test
-    void shouldSaveAndLoadSimpleTask() {
-        manager.createTask("Test", "Description");
-        Task task = manager.getTasks().iterator().next();
+    void saveAndLoadSingleTask() {
+        int taskId = manager.createTask(
+                "Test Task",
+                "Task description",
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2025, 5, 28, 12, 0)
+        );
+        Task loaded = manager.getTaskById(taskId);
 
-        TaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
-        Task loadedTask = loaded.getTaskById(task.getId());
+        assertEquals("Test Task", loaded.getName());
+        assertEquals("Task description", loaded.getDescription());
 
-        assertNotNull(loadedTask);
-        assertEquals(task, loadedTask);
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(file);
+        Task loadedAgain = loadedManager.getTaskById(taskId);
+        assertEquals(loaded, loadedAgain);
     }
 
     @Test
-    void shouldSaveAndLoadEpicWithSubtasks() {
-        int epicId = manager.createEpic("Epic", "Epic Desc");
-        manager.createSubtask("Sub1", "Subdesc1", epicId);
-        manager.createSubtask("Sub2", "Subdesc2", epicId);
+    void saveAndLoadEpicWithSubtasks() {
+        int epicId = manager.createEpic(
+                "Epic 1",
+                "Epic description"
+        );
 
-        TaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
-        Epic loadedEpic = loaded.getEpicById(epicId);
+        int sub1Id = manager.createSubtask(
+                "Subtask 1",
+                "Description 1",
+                Status.NEW,
+                epicId,
+                Duration.ofMinutes(45),
+                LocalDateTime.of(2025, 5, 29, 10, 0)
+        );
+        int sub2Id = manager.createSubtask(
+                "Subtask 2",
+                "Description 2",
+                Status.DONE,
+                epicId,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2025, 5, 29, 11, 0)
+        );
 
+        Epic loadedEpic = manager.getEpicById(epicId);
         assertNotNull(loadedEpic);
-        List<Subtask> subtasks = loaded.getSubtasks().stream().filter(s -> s.getEpicId() == epicId).toList();
-        assertEquals(2, subtasks.size());
+        assertEquals(2, loadedEpic.getSubtaskIds().size());
+
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(file);
+        Epic loadedEpicAgain = loadedManager.getEpicById(epicId);
+        assertNotNull(loadedEpicAgain);
+        assertEquals(loadedEpic.getSubtaskIds(), loadedEpicAgain.getSubtaskIds());
+
+        Subtask loadedSub1 = loadedManager.getSubtaskById(sub1Id);
+        Subtask loadedSub2 = loadedManager.getSubtaskById(sub2Id);
+        assertEquals(manager.getSubtaskById(sub1Id), loadedSub1);
+        assertEquals(manager.getSubtaskById(sub2Id), loadedSub2);
     }
 
     @Test
-    void loadedManagerBehavesLikeOriginal() {
-        int epicId = manager.createEpic("Epic", "desc");
-        manager.createSubtask("S1", "A", epicId);
-        manager.createTask("T1", "B");
+    void saveAndLoadMultipleTasks() {
+        int id1 = manager.createTask(
+                "Task 1", "desc1",
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2025, 5, 28, 9, 0)
+        );
+        int id2 = manager.createTask(
+                "Task 2", "desc2",
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2025, 5, 28, 10, 0)
+        );
 
-        TaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile);
-
-        assertEquals(manager.getTasks().size(), loaded.getTasks().size());
-        assertEquals(manager.getEpics().size(), loaded.getEpics().size());
-        assertEquals(manager.getSubtasks().size(), loaded.getSubtasks().size());
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(file);
+        assertNotNull(loadedManager.getTaskById(id1));
+        assertNotNull(loadedManager.getTaskById(id2));
     }
 }

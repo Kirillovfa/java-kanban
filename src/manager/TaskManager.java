@@ -2,6 +2,8 @@ package manager;
 
 import task.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,17 +14,23 @@ public interface TaskManager {
 
     Collection<Subtask> getSubtasks();
 
+    void removeAllTasks();
+
+    void removeAllEpics();
+
+    void removeAllSubtasks();
+
     Task getTaskById(int id);
 
     Epic getEpicById(int id);
 
     Subtask getSubtaskById(int id);
 
-    void createTask(String name, String description);
+    int createTask(String name, String description, Duration duration, LocalDateTime startTime);
 
     int createEpic(String name, String description);
 
-    void createSubtask(String name, String description, int epicId);
+    int createSubtask(String name, String description, Status status, int epicId, Duration duration, LocalDateTime startTime);
 
     void updateTask(Task task);
 
@@ -30,21 +38,15 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-    void deleteTask(int id);
+    void removeTask(int id);
 
-    void deleteSubtask(int id);
+    void removeEpic(int id);
 
-    void deleteTaskById(int id);
+    void removeSubtask(int id);
 
-    void deleteEpicById(int id);
+    List<Subtask> getEpicSubtasks(int epicId);
 
-    void deleteSubtaskById(int id);
+    List<Task> getPrioritizedTasks();
 
-    void deleteAllTasks();
-
-    void deleteAllEpics();
-
-    void deleteAllSubtasks();
-
-    List<Task> getHistory();
+    HistoryManager getHistoryManager();
 }
