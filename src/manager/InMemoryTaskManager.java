@@ -81,7 +81,8 @@ public abstract class InMemoryTaskManager implements TaskManager {
     @Override
     public int createTask(String name, String description, Duration duration, LocalDateTime startTime) {
         Task task = new Task(generateId(), name, description, Status.NEW, duration, startTime);
-        if (hasIntersection(task)) throw new IllegalArgumentException("Задача пересекается по времени с другой задачей");
+        if (hasIntersection(task))
+            throw new IllegalArgumentException("Задача пересекается по времени с другой задачей");
         tasks.put(task.getId(), task);
         if (startTime != null) prioritizedTasks.add(task);
         return task.getId();
@@ -99,7 +100,8 @@ public abstract class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(epicId);
         if (epic == null) throw new IllegalArgumentException("Epic не найден");
         Subtask subtask = new Subtask(generateId(), name, description, status, epicId, duration, startTime);
-        if (hasIntersection(subtask)) throw new IllegalArgumentException("Сабтаска пересекается по времени с другой задачей");
+        if (hasIntersection(subtask))
+            throw new IllegalArgumentException("Сабтаска пересекается по времени с другой задачей");
         subtasks.put(subtask.getId(), subtask);
         epic.addSubtask(subtask.getId());
         if (startTime != null) prioritizedTasks.add(subtask);
@@ -111,7 +113,8 @@ public abstract class InMemoryTaskManager implements TaskManager {
     public void updateTask(Task task) {
         if (!tasks.containsKey(task.getId())) throw new IllegalArgumentException("Task not found");
         prioritizedTasks.remove(tasks.get(task.getId()));
-        if (hasIntersection(task)) throw new IllegalArgumentException("Задача пересекается по времени с другой задачей");
+        if (hasIntersection(task))
+            throw new IllegalArgumentException("Задача пересекается по времени с другой задачей");
         tasks.put(task.getId(), task);
         if (task.getStartTime() != null) prioritizedTasks.add(task);
     }
@@ -127,7 +130,8 @@ public abstract class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         if (!subtasks.containsKey(subtask.getId())) throw new IllegalArgumentException("Subtask not found");
         prioritizedTasks.remove(subtasks.get(subtask.getId()));
-        if (hasIntersection(subtask)) throw new IllegalArgumentException("Сабтаска пересекается по времени с другой задачей");
+        if (hasIntersection(subtask))
+            throw new IllegalArgumentException("Сабтаска пересекается по времени с другой задачей");
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
         if (subtask.getStartTime() != null) prioritizedTasks.add(subtask);

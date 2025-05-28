@@ -48,8 +48,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldReturnPrioritizedTasksSortedByStartTime() {
-        manager.createTask("Task1", "Desc", Duration.ofMinutes(5), LocalDateTime.of(2024,1,1,10,0));
-        manager.createTask("Task2", "Desc", Duration.ofMinutes(5), LocalDateTime.of(2024,1,1,9,0));
+        manager.createTask("Task1", "Desc", Duration.ofMinutes(5), LocalDateTime.of(2024, 1, 1, 10, 0));
+        manager.createTask("Task2", "Desc", Duration.ofMinutes(5), LocalDateTime.of(2024, 1, 1, 9, 0));
         List<Task> prioritized = manager.getPrioritizedTasks();
         assertEquals(2, prioritized.size());
         assertTrue(prioritized.get(0).getStartTime().isBefore(prioritized.get(1).getStartTime()));
@@ -57,9 +57,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldThrowExceptionIfTasksIntersect() {
-        manager.createTask("Task1", "Desc", Duration.ofMinutes(60), LocalDateTime.of(2024,1,1,10,0));
+        manager.createTask("Task1", "Desc", Duration.ofMinutes(60), LocalDateTime.of(2024, 1, 1, 10, 0));
         assertThrows(IllegalArgumentException.class,
-                () -> manager.createTask("Task2", "Desc", Duration.ofMinutes(30), LocalDateTime.of(2024,1,1,10,30)));
+                () -> manager.createTask("Task2", "Desc", Duration.ofMinutes(30), LocalDateTime.of(2024, 1, 1, 10, 30)));
     }
 
     @Test

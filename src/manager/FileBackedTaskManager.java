@@ -100,38 +100,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private String toString(Task task) {
         if (task.getTaskType() == TaskType.SUBTASK) {
             Subtask st = (Subtask) task;
-            return String.join(",",
-                    String.valueOf(st.getId()),
-                    st.getTaskType().toString(),
-                    st.getName(),
-                    st.getStatus().toString(),
-                    st.getDescription(),
-                    String.valueOf(st.getEpicId()),
-                    st.getDuration() != null ? String.valueOf(st.getDuration().toMinutes()) : "",
-                    st.getStartTime() != null ? st.getStartTime().toString() : ""
-            );
+            return String.join(",", String.valueOf(st.getId()), st.getTaskType().toString(), st.getName(), st.getStatus().toString(), st.getDescription(), String.valueOf(st.getEpicId()), st.getDuration() != null ? String.valueOf(st.getDuration().toMinutes()) : "", st.getStartTime() != null ? st.getStartTime().toString() : "");
         } else if (task.getTaskType() == TaskType.EPIC) {
-            return String.join(",",
-                    String.valueOf(task.getId()),
-                    task.getTaskType().toString(),
-                    task.getName(),
-                    task.getStatus().toString(),
-                    task.getDescription(),
-                    "",
-                    task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "",
-                    task.getStartTime() != null ? task.getStartTime().toString() : ""
-            );
+            return String.join(",", String.valueOf(task.getId()), task.getTaskType().toString(), task.getName(), task.getStatus().toString(), task.getDescription(), "", task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "", task.getStartTime() != null ? task.getStartTime().toString() : "");
         } else {
-            return String.join(",",
-                    String.valueOf(task.getId()),
-                    task.getTaskType().toString(),
-                    task.getName(),
-                    task.getStatus().toString(),
-                    task.getDescription(),
-                    "",
-                    task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "",
-                    task.getStartTime() != null ? task.getStartTime().toString() : ""
-            );
+            return String.join(",", String.valueOf(task.getId()), task.getTaskType().toString(), task.getName(), task.getStatus().toString(), task.getDescription(), "", task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "", task.getStartTime() != null ? task.getStartTime().toString() : "");
         }
     }
 
@@ -172,9 +145,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private String historyToString(HistoryManager manager) {
-        return manager.getHistory().stream()
-                .map(task -> String.valueOf(task.getId()))
-                .collect(Collectors.joining(","));
+        return manager.getHistory().stream().map(task -> String.valueOf(task.getId())).collect(Collectors.joining(","));
     }
 
     @Override
