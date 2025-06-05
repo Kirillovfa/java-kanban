@@ -1,61 +1,55 @@
 package test;
 
+import manager.HistoryManager;
+import manager.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import task.*;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import manager.*;
-import task.*;
-
-import java.util.List;
-
-public class HistoryManagerTest {
-
-    private HistoryManager historyManager;
+class HistoryManagerTest {
+    private HistoryManager history;
+    private Task task1;
+    private Task task2;
+    private Task task3;
 
     @BeforeEach
-    void setUp() {
-        historyManager = Managers.getDefaultHistory();
+    void setup() {
+        history = new InMemoryHistoryManager();
+        task1 = new Task(1, "Task1", "Desc1", Status.NEW, Duration.ofMinutes(5), LocalDateTime.now());
+        task2 = new Task(2, "Task2", "Desc2", Status.DONE, Duration.ofMinutes(5), LocalDateTime.now());
+        task3 = new Task(3, "Task3", "Desc3", Status.IN_PROGRESS, Duration.ofMinutes(5), LocalDateTime.now());
     }
 
     @Test
-    void historyManagerShouldPreserveOriginalTaskData() {
-        Task task = new Task(1, "Original", "Desc", Status.NEW);
-        historyManager.add(task);
-        task.setName("Changed");
-        String newName = historyManager.getHistory().get(0).getName();
-        assertNotEquals("Original", newName);
+    void emptyHistory() {
+        assertTrue(history.getHistory().isEmpty());
     }
 
     @Test
-    void add() {
-        Task task = new Task(1, "Task", "Desc", Status.NEW);
-        historyManager.add(task);
-        List<Task> history = historyManager.getHistory();
-
-        assertNotNull(history, "История не должна быть пустой");
-        assertEquals(1, history.size(), "Таска не добавилась в историю");
+    void addAndGetHistoryNoDuplicates() {
+        history.add(task1);
+        history.add(task1);
+        assertEquals(1, history.getHistory().size());
     }
 
     @Test
-    void taskNotAddTwice() {
-        Task task = new Task(1, "Имя таски", "Описание таски", Status.NEW);
-        historyManager.add(task);
-        historyManager.add(task);
+    void removeFromHistoryBeginningMiddleEnd() {
+        history.add(task1);
+        history.add(task2);
+        history.add(task3);
 
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size(), "1 задача может быть не больше 1 раза в истории");
-    }
+        history.remove(task1.getId());
+        assertFalse(history.getHistory().contains(task1));
 
-    @Test
-    void historyNotLimited() {
-        for (int i = 1; i <= 30; i++) {
-            Task task = new Task(i, "Имя таски " + i, "Описание таски " + i, Status.NEW);
-            historyManager.add(task);
-        }
+        history.remove(task3.getId());
+        assertFalse(history.getHistory().contains(task3));
 
-        List<Task> history = historyManager.getHistory();
-        assertEquals(30, history.size(), "Не должно быть ограничений на размер истории");
+        history.remove(task2.getId());
+        assertTrue(history.getHistory().isEmpty());
     }
 }
