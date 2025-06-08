@@ -77,7 +77,7 @@ public class HttpTaskManagerTasksTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode(), "Задача не создана"); // 201 или 200 — зависит от сервера
+        assertEquals(201, response.statusCode(), "Задача не создана");
 
         Collection<Task> tasksCollection = manager.getTasks();
         List<Task> tasksFromManager = new ArrayList<>(tasksCollection);

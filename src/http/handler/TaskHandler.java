@@ -39,14 +39,20 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                         if (isUpdate) {
                             taskManager.updateTask(task);
                         } else {
-                            taskManager.getTasks().add(task); // Добавление через коллекцию
+                            int id = taskManager.createTask(
+                                    task.getName(),
+                                    task.getDescription(),
+                                    task.getDuration(),
+                                    task.getStartTime()
+                            );
+                            task = taskManager.getTaskById(id);
                         }
                         sendCreated(exchange, gson.toJson(task));
                     } catch (manager.ManagerSaveException e) {
                         sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
                     }
                 } else {
-                    exchange.sendResponseHeaders(405, 0); // Метод не поддерживается
+                    exchange.sendResponseHeaders(405, 0);
                     exchange.close();
                 }
             } else if (path.startsWith("/tasks/")) {
@@ -69,7 +75,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                             sendText(exchange, "{\"result\":\"Задача удалена\"}");
                         }
                     } else {
-                        exchange.sendResponseHeaders(405, 0); // Метод не поддерживается
+                        exchange.sendResponseHeaders(405, 0);
                         exchange.close();
                     }
                 } else {

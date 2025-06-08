@@ -42,7 +42,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                         if (isUpdate) {
                             taskManager.updateEpic(epic);
                         } else {
-                            taskManager.getEpics().add(epic); // Добавляем через коллекцию
+                            taskManager.getEpics().add(epic);
                         }
                         sendCreated(exchange, gson.toJson(epic));
                     } catch (manager.ManagerSaveException e) {

@@ -25,11 +25,10 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
             if ("/history".equals(path)) {
                 if ("GET".equals(method)) {
-                    // Получить историю просмотров задач (как коллекцию)
                     Collection<Task> history = taskManager.getHistoryManager().getHistory();
                     sendText(exchange, gson.toJson(history));
                 } else {
-                    exchange.sendResponseHeaders(405, 0); // Метод не поддерживается
+                    exchange.sendResponseHeaders(405, 0);
                     exchange.close();
                 }
             } else {

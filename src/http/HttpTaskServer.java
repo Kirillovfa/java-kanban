@@ -10,15 +10,23 @@ import http.handler.SubtaskHandler;
 import http.handler.EpicHandler;
 import http.handler.HistoryHandler;
 import http.handler.PrioritizedHandler;
+import test.DurationAdapter;
+import test.LocalDateTimeAdapter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private final HttpServer server;
     private final TaskManager taskManager;
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Duration.class, new DurationAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .serializeNulls()
+            .create();
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
         this.taskManager = taskManager;
