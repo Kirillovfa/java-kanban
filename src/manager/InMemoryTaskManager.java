@@ -90,7 +90,7 @@ public abstract class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int createEpic(String name, String description) {
-        Epic epic = new Epic(generateId(), name, description);
+        Epic epic = new Epic(generateId(), name, description, Status.NEW);
         epics.put(epic.getId(), epic);
         return epic.getId();
     }

@@ -128,7 +128,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 if (id >= nextId) nextId = id + 1;
                 return task;
             case EPIC:
-                Epic epic = new Epic(id, name, description);
+                Epic epic = new Epic(id, name, description, Status.NEW);
                 epic.setStatus(status);
                 if (duration != null) epic.setDuration(duration);
                 if (startTime != null) epic.setStartTime(startTime);
