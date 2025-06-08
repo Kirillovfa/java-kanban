@@ -18,42 +18,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.time.format.DateTimeFormatter;
 import static org.junit.jupiter.api.Assertions.*;
-import com.google.gson.*;
-import java.lang.reflect.Type;
-
-//без адаптеров не работало
-
-class DurationAdapter implements JsonSerializer<Duration>, JsonDeserializer<Duration> {
-    @Override
-    public JsonElement serialize(Duration src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.toString());
-    }
-    @Override
-    public Duration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return Duration.parse(json.getAsString());
-    }
-}
-
-class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    @Override
-    public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.format(FORMATTER));
-    }
-    @Override
-    public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return LocalDateTime.parse(json.getAsString(), FORMATTER);
-    }
-}
 
 public class HttpTaskManagerTasksTest {
+
     private TaskManager manager;
     private HttpTaskServer taskServer;
     private Gson gson;
 
-    public HttpTaskManagerTasksTest() throws IOException {}
+    public HttpTaskManagerTasksTest() throws IOException {
+    }
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -63,6 +37,7 @@ public class HttpTaskManagerTasksTest {
                 return List.of();
             }
         };
+
         taskServer = new HttpTaskServer(manager);
 
         gson = new GsonBuilder()
