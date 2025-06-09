@@ -41,7 +41,7 @@ public class BaseHttpHandler {
         exchange.close();
     }
 
-    // 500 Internal Server Erro
+    // 500 Internal Server Error
     protected void sendInternalError(HttpExchange exchange, String message) throws IOException {
         byte[] resp = message.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");

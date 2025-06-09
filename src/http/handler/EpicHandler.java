@@ -50,11 +50,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                         boolean isUpdate = false;
 
                         try {
-                            if (isUpdate) {
-                                taskManager.updateEpic(epic);
-                            } else {
-                                taskManager.getEpics().add(epic);
-                            }
+                            taskManager.getEpics().add(epic);
                             sendCreated(exchange, gson.toJson(epic));
                         } catch (manager.ManagerSaveException e) {
                             sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
