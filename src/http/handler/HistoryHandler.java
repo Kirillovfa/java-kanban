@@ -3,10 +3,12 @@ package http.handler;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import http.HttpMethod;
 import manager.TaskManager;
 import task.Task;
+
 import java.io.IOException;
-import java.util.Collection;
+import java.util.List;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager taskManager;
@@ -20,16 +22,27 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            String method = exchange.getRequestMethod();
+            HttpMethod method;
+            try {
+                method = HttpMethod.valueOf(exchange.getRequestMethod());
+            } catch (IllegalArgumentException e) {
+                exchange.sendResponseHeaders(405, 0);
+                exchange.close();
+                return;
+            }
+
             String path = exchange.getRequestURI().getPath();
 
-            if ("/history".equals(path)) {
-                if ("GET".equals(method)) {
-                    Collection<Task> history = taskManager.getHistoryManager().getHistory();
-                    sendText(exchange, gson.toJson(history));
-                } else {
-                    exchange.sendResponseHeaders(405, 0);
-                    exchange.close();
+            if ("/tasks/history".equals(path)) {
+                switch (method) {
+                    case GET -> {
+                        List<Task> history = taskManager.getHistoryManager().getHistory();
+                        sendText(exchange, gson.toJson(history));
+                    }
+                    default -> {
+                        exchange.sendResponseHeaders(405, 0);
+                        exchange.close();
+                    }
                 }
             } else {
                 sendNotFound(exchange, "{\"error\":\"Неверный путь\"}");

@@ -3,8 +3,10 @@ package http.handler;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import http.HttpMethod;
 import manager.TaskManager;
 import task.Task;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -21,62 +23,70 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            String method = exchange.getRequestMethod();
+            HttpMethod method;
+            try {
+                method = HttpMethod.valueOf(exchange.getRequestMethod());
+            } catch (IllegalArgumentException e) {
+                exchange.sendResponseHeaders(405, 0);
+                exchange.close();
+                return;
+            }
+
             String path = exchange.getRequestURI().getPath();
 
             if ("/tasks".equals(path)) {
-                if ("GET".equals(method)) {
-                    // Получить все задачи
-                    Collection<Task> tasks = taskManager.getTasks();
-                    sendText(exchange, gson.toJson(tasks));
-                } else if ("POST".equals(method)) {
-                    String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                    Task task = gson.fromJson(body, Task.class);
-
-                    boolean isUpdate = (taskManager.getTaskById(task.getId()) != null);
-
-                    try {
-                        if (isUpdate) {
-                            taskManager.updateTask(task);
-                        } else {
-                            int id = taskManager.createTask(
-                                    task.getName(),
-                                    task.getDescription(),
-                                    task.getDuration(),
-                                    task.getStartTime()
-                            );
-                            task = taskManager.getTaskById(id);
-                        }
-                        sendCreated(exchange, gson.toJson(task));
-                    } catch (manager.ManagerSaveException e) {
-                        sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
+                switch (method) {
+                    case GET -> {
+                        Collection<Task> tasks = taskManager.getTasks();
+                        sendText(exchange, gson.toJson(tasks));
                     }
-                } else {
-                    exchange.sendResponseHeaders(405, 0);
-                    exchange.close();
+                    case POST -> {
+                        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                        Task task = gson.fromJson(body, Task.class);
+
+                        boolean isUpdate = false;
+                        try {
+                            if (isUpdate) {
+                                taskManager.updateTask(task);
+                            } else {
+                                taskManager.getTasks().add(task);
+                            }
+                            sendCreated(exchange, gson.toJson(task));
+                        } catch (manager.ManagerSaveException e) {
+                            sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
+                        }
+                    }
+                    default -> {
+                        exchange.sendResponseHeaders(405, 0);
+                        exchange.close();
+                    }
                 }
             } else if (path.startsWith("/tasks/")) {
                 String[] split = path.split("/");
                 if (split.length == 3) {
                     int id = Integer.parseInt(split[2]);
-                    if ("GET".equals(method)) {
-                        Task task = taskManager.getTaskById(id);
-                        if (task == null) {
-                            sendNotFound(exchange, "{\"error\":\"Задача не найдена\"}");
-                        } else {
-                            sendText(exchange, gson.toJson(task));
+                    switch (method) {
+                        case GET -> {
+                            Task task = taskManager.getTaskById(id);
+                            if (task == null) {
+                                sendNotFound(exchange, "{\"error\":\"Задача не найдена\"}");
+                            } else {
+                                sendText(exchange, gson.toJson(task));
+                            }
                         }
-                    } else if ("DELETE".equals(method)) {
-                        Task task = taskManager.getTaskById(id);
-                        if (task == null) {
-                            sendNotFound(exchange, "{\"error\":\"Задача не найдена\"}");
-                        } else {
-                            taskManager.removeTask(id);
-                            sendText(exchange, "{\"result\":\"Задача удалена\"}");
+                        case DELETE -> {
+                            Task task = taskManager.getTaskById(id);
+                            if (task == null) {
+                                sendNotFound(exchange, "{\"error\":\"Задача не найдена\"}");
+                            } else {
+                                taskManager.removeTask(id);
+                                sendText(exchange, "{\"result\":\"Задача удалена\"}");
+                            }
                         }
-                    } else {
-                        exchange.sendResponseHeaders(405, 0);
-                        exchange.close();
+                        default -> {
+                            exchange.sendResponseHeaders(405, 0);
+                            exchange.close();
+                        }
                     }
                 } else {
                     sendNotFound(exchange, "{\"error\":\"Неверный путь\"}");

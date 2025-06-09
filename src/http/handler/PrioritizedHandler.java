@@ -3,6 +3,7 @@ package http.handler;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import http.HttpMethod;
 import manager.TaskManager;
 import task.Task;
 
@@ -21,17 +22,27 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            String method = exchange.getRequestMethod();
+            HttpMethod method;
+            try {
+                method = HttpMethod.valueOf(exchange.getRequestMethod());
+            } catch (IllegalArgumentException e) {
+                exchange.sendResponseHeaders(405, 0);
+                exchange.close();
+                return;
+            }
+
             String path = exchange.getRequestURI().getPath();
 
-            if ("/prioritized".equals(path)) {
-                if ("GET".equals(method)) {
-                    // Получить приортетные задачи
-                    Collection<Task> prioritized = taskManager.getPrioritizedTasks();
-                    sendText(exchange, gson.toJson(prioritized));
-                } else {
-                    exchange.sendResponseHeaders(405, 0);
-                    exchange.close();
+            if ("/tasks/prioritized".equals(path)) {
+                switch (method) {
+                    case GET -> {
+                        Collection<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+                        sendText(exchange, gson.toJson(prioritizedTasks));
+                    }
+                    default -> {
+                        exchange.sendResponseHeaders(405, 0);
+                        exchange.close();
+                    }
                 }
             } else {
                 sendNotFound(exchange, "{\"error\":\"Неверный путь\"}");

@@ -3,6 +3,7 @@ package http.handler;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import http.HttpMethod; // добавь импорт
 import manager.TaskManager;
 import task.Epic;
 
@@ -22,58 +23,74 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            String method = exchange.getRequestMethod();
+            HttpMethod method;
+            try {
+                method = HttpMethod.valueOf(exchange.getRequestMethod());
+            } catch (IllegalArgumentException e) {
+                exchange.sendResponseHeaders(405, 0);
+                exchange.close();
+                return;
+            }
+
             String path = exchange.getRequestURI().getPath();
 
             if ("/epics".equals(path)) {
-                if ("GET".equals(method)) {
-                    Collection<Epic> epics = taskManager.getEpics();
-                    sendText(exchange, gson.toJson(epics));
-                } else if ("POST".equals(method)) {
-                    String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                    Epic epic = gson.fromJson(body, Epic.class);
-
-                    if (false) {
-                        taskManager.getEpicById(epic.getId());
+                switch (method) {
+                    case GET -> {
+                        Collection<Epic> epics = taskManager.getEpics();
+                        sendText(exchange, gson.toJson(epics));
                     }
-                    boolean isUpdate = false;
+                    case POST -> {
+                        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                        Epic epic = gson.fromJson(body, Epic.class);
 
-                    try {
-                        if (isUpdate) {
-                            taskManager.updateEpic(epic);
-                        } else {
-                            taskManager.getEpics().add(epic);
+                        if (false) {
+                            taskManager.getEpicById(epic.getId());
                         }
-                        sendCreated(exchange, gson.toJson(epic));
-                    } catch (manager.ManagerSaveException e) {
-                        sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
+                        boolean isUpdate = false;
+
+                        try {
+                            if (isUpdate) {
+                                taskManager.updateEpic(epic);
+                            } else {
+                                taskManager.getEpics().add(epic);
+                            }
+                            sendCreated(exchange, gson.toJson(epic));
+                        } catch (manager.ManagerSaveException e) {
+                            sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
+                        }
                     }
-                } else {
-                    exchange.sendResponseHeaders(405, 0);
-                    exchange.close();
+                    default -> {
+                        exchange.sendResponseHeaders(405, 0);
+                        exchange.close();
+                    }
                 }
             } else if (path.startsWith("/epics/")) {
                 String[] split = path.split("/");
                 if (split.length == 3) {
                     int id = Integer.parseInt(split[2]);
-                    if ("GET".equals(method)) {
-                        Epic epic = taskManager.getEpicById(id);
-                        if (epic == null) {
-                            sendNotFound(exchange, "{\"error\":\"Эпик не найден\"}");
-                        } else {
-                            sendText(exchange, gson.toJson(epic));
+                    switch (method) {
+                        case GET -> {
+                            Epic epic = taskManager.getEpicById(id);
+                            if (epic == null) {
+                                sendNotFound(exchange, "{\"error\":\"Эпик не найден\"}");
+                            } else {
+                                sendText(exchange, gson.toJson(epic));
+                            }
                         }
-                    } else if ("DELETE".equals(method)) {
-                        Epic epic = taskManager.getEpicById(id);
-                        if (epic == null) {
-                            sendNotFound(exchange, "{\"error\":\"Эпик не найден\"}");
-                        } else {
-                            taskManager.removeEpic(id);
-                            sendText(exchange, "{\"result\":\"Эпик удалён\"}");
+                        case DELETE -> {
+                            Epic epic = taskManager.getEpicById(id);
+                            if (epic == null) {
+                                sendNotFound(exchange, "{\"error\":\"Эпик не найден\"}");
+                            } else {
+                                taskManager.removeEpic(id);
+                                sendText(exchange, "{\"result\":\"Эпик удалён\"}");
+                            }
                         }
-                    } else {
-                        exchange.sendResponseHeaders(405, 0);
-                        exchange.close();
+                        default -> {
+                            exchange.sendResponseHeaders(405, 0);
+                            exchange.close();
+                        }
                     }
                 } else {
                     sendNotFound(exchange, "{\"error\":\"Неверный путь\"}");
