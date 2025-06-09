@@ -69,7 +69,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     historyIds = Arrays.asList(line.split(","));
                 }
             }
-            // Восстановление связей сабтасков и эпиков
             for (Subtask sub : subtasks.values()) {
                 Epic epic = epics.get(sub.getEpicId());
                 if (epic != null) {
