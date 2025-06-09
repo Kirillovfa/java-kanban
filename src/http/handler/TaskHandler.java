@@ -44,17 +44,14 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                         Task task = gson.fromJson(body, Task.class);
 
-                        boolean isUpdate = false;
-                        try {
-                            if (isUpdate) {
-                                taskManager.updateTask(task);
-                            } else {
-                                taskManager.getTasks().add(task);
-                            }
-                            sendCreated(exchange, gson.toJson(task));
-                        } catch (manager.ManagerSaveException e) {
-                            sendInternalError(exchange, "{\"error\":\"Ошибка при сохранении данных\"}");
-                        }
+                        int id = taskManager.createTask(
+                                task.getName(),
+                                task.getDescription(),
+                                task.getDuration(),
+                                task.getStartTime()
+                        );
+                        Task createdTask = taskManager.getTaskById(id);
+                        sendCreated(exchange, gson.toJson(createdTask));
                     }
                     default -> {
                         exchange.sendResponseHeaders(405, 0);
