@@ -1,7 +1,6 @@
 package manager;
 
 import task.*;
-
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -69,7 +68,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     historyIds = Arrays.asList(line.split(","));
                 }
             }
-            // Восстановление связей сабтасков и эпиков
             for (Subtask sub : subtasks.values()) {
                 Epic epic = epics.get(sub.getEpicId());
                 if (epic != null) {
@@ -128,7 +126,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 if (id >= nextId) nextId = id + 1;
                 return task;
             case EPIC:
-                Epic epic = new Epic(id, name, description);
+                Epic epic = new Epic(id, name, description, Status.NEW);
                 epic.setStatus(status);
                 if (duration != null) epic.setDuration(duration);
                 if (startTime != null) epic.setStartTime(startTime);
